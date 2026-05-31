@@ -9,6 +9,17 @@ on:
 jobs:
   security-checks:
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     defaults:
       run:
         working-directory: SerovAA
@@ -54,7 +65,7 @@ jobs:
         if: always()
         with:
           name: bandit-reports
-          path: SerovAA/bandit-*.json   # полный путь от корня репозитория
+          path: SerovAA/bandit-*.json
 
       - name: Run Gitleaks
         uses: gitleaks/gitleaks-action@v2
@@ -68,7 +79,7 @@ jobs:
           sudo dpkg -i trivy_0.49.1_Linux-64bit.deb
 
       - name: Scan filesystem with Trivy
-        run: trivy fs --severity HIGH,CRITICAL --no-progress --exit-code 0 ../SerovAA
+        run: trivy fs --severity HIGH,CRITICAL --no-progress --exit-code 0 .
 
       - name: Scan Dockerfile (backend)
         run: trivy config --severity HIGH,CRITICAL backend/Dockerfile
