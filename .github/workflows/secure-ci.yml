@@ -73,11 +73,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
-      - name: Setup Trivy
-        uses: aquasecurity/setup-trivy@v0.2.0
-        with:
-          version: latest
-          cache: true
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/latest/download/trivy_Linux-64bit.deb
+          sudo dpkg -i trivy_Linux-64bit.deb
       
       - name: Scan filesystem with Trivy
         run: trivy fs --severity HIGH,CRITICAL --no-progress --exit-code 0 .
